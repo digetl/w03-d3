@@ -1,5 +1,5 @@
 require('pg')
-
+require_relative('../sql_runner')
 class PizzaOrder
 
   attr_accessor :topping, :quantity
@@ -47,33 +47,28 @@ class PizzaOrder
   end
 
   def delete()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "DELETE FROM pizza_orders where id = $1"
     values = [@id]
-    db.prepare("delete", sql)
-    db.exec_prepared("delete", values)
-    db.close()
+    results = SqlRunner.run(sql, values)
   end
 
   def self.find(id)
     sql = "SELECT * FROM pizza_orders WHERE id = $1"
     values = [id]
-    pizza_order_array = SqlRunner.run(sql, values)
-    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
-    
+    order_hash = SqlRunner.run(sql, values).first()
+    return PizzaOrder.new(order_hash) if order_hash
   end
 
   def self.delete_all()
     sql = "DELETE FROM pizza_orders"
-    pizza_order_array = SqlRunner.run(sql)
-    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
+    SqlRunner.run(sql)
 
   end
 
   def self.all()
     sql = "SELECT * FROM pizza_orders"
-    pizza_order_array = SqlRunner.run(sql)
-    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
+    orders = SqlRunner.run(sql)
+    return orders.map { |order| PizzaOrder.new(order)}
   end
 
 end

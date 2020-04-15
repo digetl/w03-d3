@@ -1,5 +1,5 @@
 require('pg')
-require_relative('../db/sql_runner')
+require_relative('../sql_runner')
 
 class Customer
     attr_reader :id, :first_name, :last_name
@@ -22,15 +22,13 @@ class Customer
         )
         RETURNING id"
         values = [@first_name, @last_name]
-        customers_array = SqlRunner.run(sql, values)
-        return customers_array.map{ |customer_data| Customer.new(customer_data) }
+        @id = SqlRunner.run(sql, values)[0]["id"].to_i
 
     end
 
     def self.delete_all()
         sql = "DELETE FROM customers"
-        customers_array = SqlRunner.run(sql)
-        return customers_array.map{ |customer_data| Customer.new(customer_data) }
+        SqlRunner.run(sql)
     end
 
     def self.all()
