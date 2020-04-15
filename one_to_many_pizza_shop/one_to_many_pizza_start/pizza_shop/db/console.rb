@@ -5,7 +5,7 @@ require_relative("../models/customer")
 PizzaOrder.delete_all()
 Customer.delete_all()
 
-customer1 = Customer.new({"first_name" => "Zsolt", "last_name" => "Someone"})
+customer1 = Customer.new({"first_name" => "Zsolt", "last_name" => "Podoba-S"})
 customer1.save()
 
 order1 = PizzaOrder.new({
