@@ -12,7 +12,6 @@ class Customer
 
     def save()
     
-        db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
         sql = "INSERT INTO customers
         (
           first_name,
@@ -23,18 +22,15 @@ class Customer
         )
         RETURNING id"
         values = [@first_name, @last_name]
-        db.prepare("save", sql)
-        @id = db.exec_prepared("save", values)[0]["id"].to_i
-        db.close()
-    
+        customers_array = SqlRunner.run(sql, values)
+        return customers_array.map{ |customer_data| Customer.new(customer_data) }
+
     end
 
     def self.delete_all()
-        db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
         sql = "DELETE FROM customers"
-        db.prepare("delete_all", sql)
-        db.exec_prepared("delete_all")
-        db.close
+        customers_array = SqlRunner.run(sql)
+        return customers_array.map{ |customer_data| Customer.new(customer_data) }
     end
 
     def self.all()

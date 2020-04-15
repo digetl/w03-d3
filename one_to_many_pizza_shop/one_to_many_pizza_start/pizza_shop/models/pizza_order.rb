@@ -13,7 +13,6 @@ class PizzaOrder
   end
 
   def save()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "INSERT INTO pizza_orders
     (
       topping,
@@ -25,13 +24,12 @@ class PizzaOrder
     )
     RETURNING id"
     values = [@topping, @quantity, @customer_id]
-    db.prepare("save", sql)
-    @id = db.exec_prepared("save", values)[0]["id"].to_i
-    db.close()
+    pizza_order_array = SqlRunner.run(sql, values)
+    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
+
   end
 
   def update()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "
     UPDATE pizza_orders SET (
       first_name,
@@ -44,9 +42,8 @@ class PizzaOrder
     )
     WHERE id = $5"
     values = [@first_name, @last_name, @topping, @quantity, @id]
-    db.prepare("update", sql)
-    db.exec_prepared("update", values)
-    db.close()
+    pizza_order_array = SqlRunner.run(sql, values)
+    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
   end
 
   def delete()
@@ -59,32 +56,24 @@ class PizzaOrder
   end
 
   def self.find(id)
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "SELECT * FROM pizza_orders WHERE id = $1"
     values = [id]
-    db.prepare("find", sql)
-    results = db.exec_prepared("find", values)
-    db.close()
-    order_hash = results.first
-    order = PizzaOrder.new(order_hash)
-    return order
+    pizza_order_array = SqlRunner.run(sql, values)
+    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
+    
   end
 
   def self.delete_all()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "DELETE FROM pizza_orders"
-    db.prepare("delete_all", sql)
-    db.exec_prepared("delete_all")
-    db.close()
+    pizza_order_array = SqlRunner.run(sql)
+    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
+
   end
 
   def self.all()
-    db = PG.connect({ dbname: 'pizza_shop', host: 'localhost' })
     sql = "SELECT * FROM pizza_orders"
-    db.prepare("all", sql)
-    orders = db.exec_prepared("all")
-    db.close()
-    return orders.map { |order| PizzaOrder.new(order) }
+    pizza_order_array = SqlRunner.run(sql)
+    return pizza_order_array.map{ |order_data| PizzaOrder.new(order_data) }
   end
 
 end
